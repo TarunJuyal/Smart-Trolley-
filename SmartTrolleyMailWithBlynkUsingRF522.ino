@@ -35,7 +35,6 @@ const char pass[]="your password";
 BLYNK_WRITE(V5){                    
     int value=param.asInt();
     if(value){
-      Serial.println("Remove button pressed");
       isRemoving=1;
       currentItem1Flag=false;
       currentItem2Flag=false;
@@ -47,7 +46,6 @@ BLYNK_WRITE(V6){
   int value = param.asInt();  
                     
    if(value && noOfTotalItems>0){
-    Serial.println("Exiting and sending mail");
         String response=String("<pre>Thank you for shopping with us.This is System Generated Bill.</pre><hr/><table border=\"1\" width=\"80%\" align=\"center\" cellspacing=\"0\"><tbody><tr \"background:#04c0f8;\"><th>Product</th><th>Quantity</th><th>Price</th></tr>");
   if(noOfItem1>0){
     int item1Total=noOfItem1*priceOfItem1;
@@ -57,8 +55,7 @@ BLYNK_WRITE(V6){
     int item2Total=noOfItem2*priceOfItem2;
     response+="<tr style=\"text-align:center;\"><td>Milk</td><td>"+String(noOfItem2)+"</td><td>"+String(item2Total)+"</td></tr>";
     }
-    response+="<tr><td colspan=\"3\" style=\"text-align:right;padding-right:2rem;\">Total Amount = "+String(totalBill)+"</td></tr></tbody></table>";
-  Serial.println(response);  
+    response+="<tr><td colspan=\"3\" style=\"text-align:right;padding-right:2rem;\">Total Amount = "+String(totalBill)+"</td></tr></tbody></table>";  
   Blynk.email("Subject: Smart Trolley Bill",response);
   delay(1000);
   Blynk.notify("Email has been sent.");
@@ -75,7 +72,6 @@ BLYNK_WRITE(V6){
   lcd.print(0,1,"Scan To Add Item");
    }
   if(value && noOfTotalItems==0){
-      Serial.println("Exit but no item in cart");
       lcd.clear();
       lcd.print(0,0,"No Items In Cart");
       delay(2000);
@@ -86,9 +82,7 @@ BLYNK_WRITE(V6){
 BLYNK_WRITE(V3){                      
   int value=param.asInt();
   if(value && isRemoving==0){
-    Serial.println("Increment operation");
       if(currentItem1Flag){
-        Serial.println("increment item 1");
         totalBill = totalBill + priceOfItem1;
         noOfItem1++;
         lcd.clear();
@@ -97,7 +91,6 @@ BLYNK_WRITE(V3){
         delay(2000);
   }
   else if(currentItem2Flag){
-        Serial.println("increment item 2");
         totalBill = totalBill + priceOfItem2;
         noOfItem2++;
         lcd.clear();
@@ -105,7 +98,6 @@ BLYNK_WRITE(V3){
         lcd.print(0,1,"Increased to: "+String(noOfItem2));
         delay(2000);
   }else{
-      Serial.println("Nothing to increment");
       lcd.clear();
       lcd.print(0,0,"No Item present");
       lcd.print(0,1,"in the Cart");
@@ -119,10 +111,8 @@ BLYNK_WRITE(V3){
 BLYNK_WRITE(V4){                    
   int value=param.asInt();
   if(value && isRemoving==0){
-    Serial.println("Decrement operation");
     if(currentItem1Flag){
       if(noOfItem1>0){
-          Serial.println("Item 1 decrement");
           totalBill = totalBill - priceOfItem1;
           noOfItem1--;
           lcd.clear();
@@ -130,7 +120,6 @@ BLYNK_WRITE(V4){
           lcd.print(0,1,"Decreased to: "+String(noOfItem1));
           delay(2000);
         }else{
-            Serial.println("item 1 already 0");
             lcd.clear();
             lcd.print(0,0,"Chips Quantity...");
             lcd.print(0,1,"Already 0");
@@ -139,7 +128,6 @@ BLYNK_WRITE(V4){
   }
   else if(currentItem2Flag){
       if(noOfItem2>0){
-          Serial.println("Item 2 decrement");
           totalBill = totalBill - priceOfItem2;
           noOfItem2--;
           lcd.clear();
@@ -147,14 +135,12 @@ BLYNK_WRITE(V4){
           lcd.print(0,1,"Decreased to: "+String(noOfItem2));
           delay(2000);
         }else{
-            Serial.println("item 2 already 0");
             lcd.clear();
             lcd.print(0,0,"Milk Quantity...");
             lcd.print(0,1,"Already 0");
             delay(2000);
           }
   }else{
-      Serial.println("Nothing to decrement");
       lcd.clear();
       lcd.print(0,0,"No Item present");
       lcd.print(0,1,"in the Cart");
@@ -173,8 +159,7 @@ void setup() {
   lcd.print(2,0,"SMART TROLLEY");
   delay(2000);
   lcd.print(0,1,"Scan To Add Item");
-  Serial.println("In setup");
-}
+  }
 
 void loop() {
   Blynk.run();
@@ -184,16 +169,13 @@ void loop() {
     for (byte i = 0; i < 4; i++) {
       tag += rfid.uid.uidByte[i];
     }
-    Serial.println(tag);
-    if(tag!=previousInput){
+  if(tag!=previousInput){
     currentItem1Flag=false;
     currentItem2Flag=false;
     }
     if ((tag=="1656920427") && (isRemoving==0))
       {
-        Serial.println("Item 1 scanned ");
         if(noOfItem1==0){
-          Serial.println("New entry for item 1");
           lcd.clear();
           lcd.print(0,0,"Chips Added.");
           lcd.print(0,1,"Price(Rs): 20");
@@ -207,9 +189,7 @@ void loop() {
       }
     else if ((tag=="611622082") && (isRemoving==0))
       {
-        Serial.println("Item 2 scanned");
         if(noOfItem2==0){
-          Serial.println("New entry for item 2");
           lcd.clear();
           lcd.print(0,0,"Milk Added.");
           lcd.print(0,1,"Price(Rs): 30");
@@ -223,16 +203,13 @@ void loop() {
       }
      else if ((tag== "1656920427") && (isRemoving==1))
       {
-        Serial.println("Item 1 scanned for removal");
         if(noOfItem1>0){
-          Serial.println("Item 1 removed");
         lcd.clear();
         lcd.print(0,0,"Chips Removed...");
         totalBill = totalBill - (noOfItem1*priceOfItem1);
         noOfItem1=0;
         noOfTotalItems--;
         }else{
-            Serial.println("item 1 for removal but not present");
             lcd.clear();
             lcd.print(0,0,"No Chips In Cart");
           }
@@ -241,16 +218,13 @@ void loop() {
       }
     else if ((tag == "611622082") && (isRemoving==1))
       {
-        Serial.println("Item 2 scanned for removal");
         if(noOfItem2>0){
-          Serial.println("Item 2 removed");
-        lcd.clear();
+           lcd.clear();
         lcd.print(0,0,"Milk Removed...");
         totalBill = totalBill - (noOfItem2*priceOfItem2);
         noOfItem2=0;
         noOfTotalItems--;
         }else{
-            Serial.println("Item 2 for removal but not present");
             lcd.clear();
             lcd.print(0,0,"No Milk In Cart");
           }
@@ -265,8 +239,7 @@ void loop() {
 }
 
 void defaultMessage(){
-  Serial.println("defaul msg");
-lcd.clear();
+  lcd.clear();
 lcd.print(0,0,"Add Items...");
 lcd.print(0,1,"Items:"+String(noOfTotalItems)+" Total:"+String(totalBill));
 }
